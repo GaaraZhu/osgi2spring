@@ -12,6 +12,7 @@ import (
 type config struct {
 	SourceFolder       string   `json:"source-folder"`
 	ConfigFileSuffixes []string `json:"config-file-suffixes"`
+	Rules              []string `json:"rules"`
 }
 
 var defaultConfig = config{

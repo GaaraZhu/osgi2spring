@@ -1,5 +1,6 @@
 {
     "source-folder": "C:/Users/GZhu/IdeaProjects/cms/play/nz.co.tvnz.play.api.impl/src/main/java/nz/co/tvnz/play/api/impl/",
-    "config-file-suffixes": [".yaml", ".properties"]
+    "config-file-suffixes": [".yaml", ".properties"],
+    "rules": ["rule1", "rule2", "rule3", "rule4"]
 }
 
