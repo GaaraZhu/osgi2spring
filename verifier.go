@@ -17,14 +17,14 @@ func main() {
 		rules = append(rules, ruleRegistry[r])
 	}
 
-	log.WithField("rules", cfg.Rules).Info("scanner: files to be scanned:")
+	log.WithField("rules", cfg.Rules).Info("verifier: rules to be verified:")
 
 	// 2. get all source files
 	var filesToBeScanned []string
-	var filesNotMeetRules map[string][]string = make(map[string][]string)
+	var filesNotMeetRules = make(map[string][]string)
 	err := filepath.Walk(cfg.SourceFolder, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.WithFields(log.Fields{"error": err, "folder": cfg.SourceFolder}).Error("scanner: failed to walk through source folder")
+			log.WithFields(log.Fields{"error": err, "folder": cfg.SourceFolder}).Error("verifier: failed to walk through source folder")
 			return err
 		}
 
@@ -35,24 +35,24 @@ func main() {
 	})
 
 	if err != nil {
-		log.WithFields(log.Fields{"error": err, "folder": cfg.SourceFolder}).Error("scanner: quit as it failed to walk through source folder")
+		log.WithFields(log.Fields{"error": err, "folder": cfg.SourceFolder}).Error("verifier: quit as it failed to walk through source folder")
 		return
 	}
 
-	log.WithField("file-count", len(filesToBeScanned)).Info("scanner: files to be scanned:")
+	log.WithField("file-count", len(filesToBeScanned)).Info("verifier: total files to be scanned:")
 
 	// 3. verify rule one by one
 	for _, file := range filesToBeScanned {
 		source, e := extractSource(file)
 		if e != nil {
-			log.WithField("file", file).Error("scanner: failed to extract source code")
+			log.WithField("file", file).Error("verifier: failed to extract source code")
 			return
 		}
 
 		for _, rule := range rules {
 			isMet, err := rule.isMet(source)
 			if err != nil {
-				log.WithFields(log.Fields{"file": file, "rule": rule}).Error("scanner: failed to verify rule")
+				log.WithFields(log.Fields{"file": file, "rule": rule}).Error("verifier: failed to verify rule")
 				return
 			}
 
@@ -67,7 +67,15 @@ func main() {
 	}
 
 	// 4. verification summary
-	log.WithField("filesNotMeetRules", filesNotMeetRules).Info("scanner: finished scanning. Files to be updated:")
+	if len(filesNotMeetRules) > 0 {
+		log.Info("verifier: verify result: failed -_-")
+	} else {
+		log.Info("verifier: verify result: success ^_^")
+	}
+	for k, v := range filesNotMeetRules {
+		log.WithField("file", k).Info("verifier: file:")
+		log.WithField("rule(s)", v).Info("verifier: broken rule(s):")
+	}
 }
 
 func extractSource(path string) (string, error) {
