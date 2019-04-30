@@ -19,6 +19,12 @@ func (r rule4) isMet(source string) (bool, error) {
 
 	if strings.Contains(source, "@Reference") {
 		sr := strings.Split(source, "public class ")
+		if len(sr) < 2 {
+			sr = strings.Split(source, "public abstract class ")
+			if len(sr) < 2 {
+				return true, nil // skip for interface
+			}
+		}
 		className := strings.Split(sr[1], " ")[0]
 
 		source = strings.Join(strings.Fields(source), "")
@@ -29,7 +35,6 @@ func (r rule4) isMet(source string) (bool, error) {
 			}
 			subsequentCode := strings.Split(r, ";")[0]
 			if !(strings.Contains(subsequentCode, "@Autowired") ||
-				strings.Contains(subsequentCode, "@Qualifier") ||
 				strings.Contains(subsequentCode, "@Resource") ||
 				strings.Contains(subsequentCode, "@Inject") ||
 				strings.Contains(source, "@Autowiredpublic"+className)) {

@@ -2,7 +2,9 @@ package main
 
 type rule interface {
 	getName() string
+
 	getDescription() string
+
 	isMet(source string) (bool, error) //spaces, tabs and new lines should be removed from source before passing here
 }
 
@@ -13,4 +15,5 @@ func init() {
 	ruleRegistry["rule2"] = rule2{}
 	ruleRegistry["rule3"] = rule3{}
 	ruleRegistry["rule4"] = rule4{}
+	ruleRegistry["rule5"] = rule5{}
 }

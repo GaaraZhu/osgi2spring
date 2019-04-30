@@ -1,6 +1,8 @@
 package main
 
-import "strings"
+import (
+	"strings"
+)
 
 type rule3 struct{}
 
@@ -17,7 +19,20 @@ func (r rule3) isMet(source string) (bool, error) {
 		return true, nil // skip for non spring components
 	}
 
-	if strings.Contains(source, "void deactivate") && !strings.Contains(source, "@PreDestroy") {
+	if !strings.Contains(source, "@Deactivate") {
+		return true, nil // skip if no deactivation
+	}
+
+	//non-args deactivation should be triggered automatically by using @PreDestroy
+	if strings.Contains(source, "void deactivate()") {
+		if !strings.Contains(source, "@PreDestroy") {
+			return false, nil
+		}
+		return true, nil
+	}
+
+	//activation with args should be invoked manually after property injection
+	if strings.Count(source, "deactivate(") < 2 {
 		return false, nil
 	}
 

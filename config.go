@@ -5,27 +5,26 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type config struct {
 	SourceFolder       string   `json:"source-folder"`
+	FilesToBeExcluded  []string `json:"files-to-be-excluded"`
 	ConfigFileSuffixes []string `json:"config-file-suffixes"`
 	Rules              []string `json:"rules"`
 }
 
 var defaultConfig = config{
 	SourceFolder:       "~/IdeaProjects/cms/play",
+	FilesToBeExcluded:  []string{"RedissonConfiguration.java", "PreBid.java"},
 	ConfigFileSuffixes: []string{".yaml", ".properties"},
 }
 
 func mustParseConfig() config {
 	config, err := parseConfig()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	log.WithField("config", config).Info("config: parsed config")
 	return config
 }
 

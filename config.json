@@ -1,6 +1,4 @@
 {
     "source-folder": "C:/Users/GZhu/IdeaProjects/cms/play/",
-    "config-file-suffixes": [".yaml", ".properties"],
-    "rules": ["rule2", "rule3", "rule4"]
+    "rules": ["rule1"]
 }
-

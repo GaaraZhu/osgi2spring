@@ -17,22 +17,22 @@ func (r rule2) isMet(source string) (bool, error) {
 		return true, nil // skip for non spring components
 	}
 
-	if strings.Contains(source, "@Activate") {
-		//non-args activation should be triggered automatically by using @PostConstruct
-		if strings.Contains(source, "void activate()") {
-			if !strings.Contains(source, "@PostConstruct") {
-				return false, nil
-			}
-			return true, nil
-		}
+	if !strings.Contains(source, "@Activate") {
+		return true, nil // skip if no activation
+	}
 
-		//args activation should take property injection into account and should be invoked manually
-		source = strings.NewReplacer("deactivate", "").Replace(source)
-		strings.Count(source, "activate(")
-		if strings.Count(source, "activate(") < 2 {
+	//non-args activation should be triggered automatically by using @PostConstruct
+	if strings.Contains(source, "void activate()") {
+		if !strings.Contains(source, "@PostConstruct") {
 			return false, nil
 		}
+		return true, nil
+	}
 
+	//activation with args should be invoked manually after property injection
+	source = strings.NewReplacer("deactivate", "").Replace(source)
+	if strings.Count(source, "activate(") < 2 {
+		return false, nil
 	}
 
 	return true, nil
