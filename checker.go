@@ -21,7 +21,8 @@ func main() {
 
 	// 1. get all rules
 	rules := extractRules(cfg)
-	fmt.Printf("%s: Rule(s) to be verified: \n", toolName)
+	fmt.Printf("%s: Running mode: %s \n", toolName, c.Green(cfg.Mode))
+	fmt.Printf("%s: Rule(s) to be checked: \n", toolName)
 	for _, rule := range rules {
 		fmt.Printf("\t * %s: %s\n", rule.getName(), rule.getDescription())
 	}
@@ -33,7 +34,7 @@ func main() {
 		fmt.Printf("%s: Quit as it failed to walk through source folder due to: %v\n", toolName, err)
 		return
 	}
-	fmt.Printf("%s: Total files to be verified: %v\n", toolName, c.Green(len(sourceFiles)))
+	fmt.Printf("%s: Total files to be checked: %v\n", toolName, c.Green(len(sourceFiles)))
 
 	// 3. verify files&rules one by one
 	filesNotMeetRules, err := process(sourceFiles, rules, cfg.Mode)
@@ -143,7 +144,7 @@ func extractSourceFiles(cfg config) ([]string, error) {
 			return fmt.Errorf("%s: Failed to walk through source folder due to: %v", toolName, err)
 		}
 
-		if !info.IsDir() && !needToBeExclude(info.Name(), cfg) {
+		if !info.IsDir() && strings.HasSuffix(path, ".java") && !needToBeExclude(info.Name(), cfg) {
 			sourceFiles = append(sourceFiles, path)
 		}
 		return nil
