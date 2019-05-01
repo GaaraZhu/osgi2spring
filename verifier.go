@@ -6,29 +6,38 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
+	c "github.com/logrusorgru/aurora"
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
+var toolName = c.Yellow("osgi2spring").Bold()
+
 func main() {
 	cfg := mustParseConfig()
-	fmt.Printf("verifier: verification configs: %v \n", cfg)
+	fmt.Printf("%s: Java source folder:\n\t * %s\n", toolName, cfg.SourceFolder)
 
 	// 1. get all rules
 	rules := extractRules(cfg)
+	fmt.Printf("%s: Rule(s) to be verified: \n", toolName)
+	for _, rule := range rules {
+		fmt.Printf("\t * %s: %s\n", rule.getName(), rule.getDescription())
+	}
+	fmt.Printf("\n")
 
 	// 2. get all source files
 	sourceFiles, err := extractSourceFiles(cfg)
 	if err != nil {
-		fmt.Printf("verifier: quit as it failed to walk through source folder due to: %v \n", err)
+		fmt.Printf("%s: Quit as it failed to walk through source folder due to: %v\n", toolName, err)
 		return
 	}
-	fmt.Printf("verifier: total files to be verified: %v \n", len(sourceFiles))
+	fmt.Printf("%s: Total files to be verified: %v\n", toolName, c.Green(len(sourceFiles)))
 
 	// 3. verify files&rules one by one
 	filesNotMeetRules, err := process(sourceFiles, rules)
 	if err != nil {
-		fmt.Printf("verifier: quitting due to process error, %v", err)
+		fmt.Printf("%s: Quitting due to process error, %v", toolName, err)
 		return
 	}
 
@@ -40,35 +49,27 @@ func main() {
 	sort.Strings(fileNames)
 
 	// 4. verification summary
-	fmt.Println("-------------------------------------------")
-	fmt.Println("result details:")
+	fmt.Printf("%s: Result details: \n", toolName)
 	for _, k := range fileNames {
-		fmt.Printf("file path: [%s], broken rule(s): %v \n", k, filesNotMeetRules[k])
-	}
-
-	if len(filesNotMeetRules) > 0 {
-		fmt.Println()
-		fmt.Printf("verified summary: %v files failed -_-", len(filesNotMeetRules))
-	} else {
-		fmt.Println("verified summary: success ^_^")
+		fmt.Printf("%s: %s\n", c.Cyan("File"), k)
+		fmt.Printf("%s: %s\n\n", c.Cyan("Broken rule(s)"), strings.Join(filesNotMeetRules[k], ", "))
 	}
 }
 
 func process(files []string, rules []rule) (map[string][]string, error) {
 	bar := pb.StartNew(len(files))
-
 	var filesNotMeetRules = make(map[string][]string)
 	for _, file := range files {
 		source, err := extractSource(file)
 		if err != nil {
-			fmt.Printf("verifier: failed to extract source code due to: %v \n", err)
+			fmt.Printf("%s: Failed to extract source code due to: %v\n", toolName, err)
 			return filesNotMeetRules, err
 		}
 
 		for _, rule := range rules {
 			isMet, err := rule.isMet(source)
 			if err != nil {
-				fmt.Printf("verifier: failed to verify rule due to: %v \n", file)
+				fmt.Printf("%s: Failed to verify rule due to: %v\n", toolName, file)
 				return filesNotMeetRules, err
 			}
 
@@ -82,7 +83,11 @@ func process(files []string, rules []rule) (map[string][]string, error) {
 		}
 		bar.Increment()
 	}
-	bar.FinishPrint("The End!")
+	var finishMessage = fmt.Sprintf("%s: Result summary: success ^_^\n\n", toolName)
+	if len(filesNotMeetRules) > 0 {
+		finishMessage = fmt.Sprintf("%s: Result summary: %v files failed -_-\n", toolName, c.Red(len(filesNotMeetRules)))
+	}
+	bar.FinishPrint(finishMessage)
 
 	return filesNotMeetRules, nil
 }
@@ -100,7 +105,7 @@ func extractSourceFiles(cfg config) ([]string, error) {
 	var sourceFiles []string
 	err := filepath.Walk(cfg.SourceFolder, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return fmt.Errorf("verifier: failed to walk through source folder due to: %v", err)
+			return fmt.Errorf("%s: Failed to walk through source folder due to: %v", toolName, err)
 		}
 
 		if !info.IsDir() && !needToBeExclude(info.Name(), cfg) {
