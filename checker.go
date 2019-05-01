@@ -169,12 +169,8 @@ func extractSource(path string) (string, error) {
 }
 
 func needToBeExclude(fileName string, cfg config) bool {
-	for _, f := range cfg.FilesToBeExcluded {
-		if f == fileName {
-			return true
-		}
-	}
-	return false
+	_, excluded := cfg.filesToBeExcluded[fileName]
+	return excluded
 }
 
 func getBeansPayload() (string, error) {

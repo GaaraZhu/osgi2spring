@@ -12,12 +12,17 @@ type config struct {
 	FilesToBeExcluded []string `json:"files-to-be-excluded"`
 	Rules             []string `json:"rules"`
 	Mode              string   `json:"mode"`
+
+	filesToBeExcluded map[string]string
 }
 
 var defaultConfig = config{
-	SourceFolder:      "~/IdeaProjects/cms/play",
-	FilesToBeExcluded: []string{"RedissonConfiguration.java", "PreBid.java", "EndpointSentryConfig.java"},
+	SourceFolder: "~/IdeaProjects/cms/play",
+	FilesToBeExcluded: []string{"RedissonConfiguration.java", "PreBid.java", "EndpointSentryConfig.java", "RemoteJcrEventListener.java",
+		"TagManagerConfig.java", "OsgiServiceReferenceResolver.java", "SegmentConfig.java", "PlayApplication.java", "JerseyConfig.java",
+		"ConsumerAuthenticationFilter.java"},
 	Mode:              "static",
+	filesToBeExcluded: make(map[string]string),
 }
 
 func mustParseConfig() config {
@@ -49,6 +54,10 @@ func parseConfig() (config, error) {
 	err = json.Unmarshal(byts, &defaultConfig)
 	if err != nil {
 		return defaultConfig, fmt.Errorf("couldn't unmarshal config file. err=%v", err)
+	}
+
+	for _, f := range defaultConfig.FilesToBeExcluded {
+		defaultConfig.filesToBeExcluded[f] = ""
 	}
 
 	return defaultConfig, nil
