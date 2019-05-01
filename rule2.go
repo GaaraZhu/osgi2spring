@@ -13,8 +13,8 @@ func (r rule2) getDescription() string {
 }
 
 func (r rule2) isMet(source string) (bool, error) {
-	if !strings.Contains(source, "@org.springframework.stereotype.Component") {
-		return true, nil // skip for non spring components
+	if !strings.Contains(source, "@Component") {
+		return true, nil // skip for non OSGI components
 	}
 
 	if !strings.Contains(source, "@Activate") {

@@ -13,8 +13,8 @@ func (r rule4) getDescription() string {
 }
 
 func (r rule4) isMet(source string) (bool, error) {
-	if !strings.Contains(source, "@org.springframework.stereotype.Component") {
-		return true, nil // skip for non spring beans
+	if !strings.Contains(source, "@Component") {
+		return true, nil // skip for non OSGI beans
 	}
 
 	if strings.Contains(source, "@Reference") {

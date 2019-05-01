@@ -16,7 +16,7 @@ type config struct {
 
 var defaultConfig = config{
 	SourceFolder:       "~/IdeaProjects/cms/play",
-	FilesToBeExcluded:  []string{"RedissonConfiguration.java", "PreBid.java"},
+	FilesToBeExcluded:  []string{"RedissonConfiguration.java", "PreBid.java", "EndpointSentryConfig.java"},
 	ConfigFileSuffixes: []string{".yaml", ".properties"},
 }
 
