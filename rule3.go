@@ -14,7 +14,7 @@ func (r rule3) getDescription() string {
 	return "deactivation method should be invoked before object is destoryed"
 }
 
-func (r rule3) isMet(source string) (bool, error) {
+func (r rule3) isMetStaticly(source string) (bool, error) {
 	if !strings.Contains(source, "@Component") {
 		return true, nil // skip for non OSGI components
 	}
@@ -36,5 +36,9 @@ func (r rule3) isMet(source string) (bool, error) {
 		return false, nil
 	}
 
+	return true, nil
+}
+
+func (r rule3) isMetRuntimely(source, beanPayload string) (bool, error) {
 	return true, nil
 }

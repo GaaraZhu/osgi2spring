@@ -285,7 +285,7 @@ func TestRules(t *testing.T) {
 	for _, data := range testDate {
 		fmt.Printf("Running test case %v for rule: %v \n", data.testName, data.ruleName)
 		rule := ruleRegistry[data.ruleName]
-		isMet, err := rule.isMet(data.source)
+		isMet, err := rule.isMetStaticly(data.source)
 		if err != nil {
 			t.Errorf("Failed to run %v due to %v \n", data.testName, err)
 			continue

@@ -12,7 +12,7 @@ func (r rule5) getDescription() string {
 	return "non-args constructor should be present for OSGI"
 }
 
-func (r rule5) isMet(source string) (bool, error) {
+func (r rule5) isMetStaticly(source string) (bool, error) {
 	if !strings.Contains(source, "@Component") {
 		return true, nil // skip for non OSGI beans
 	}
@@ -31,5 +31,9 @@ func (r rule5) isMet(source string) (bool, error) {
 		return false, nil
 	}
 
+	return true, nil
+}
+
+func (r rule5) isMetRuntimely(source, beanPayload string) (bool, error) {
 	return true, nil
 }

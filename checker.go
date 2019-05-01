@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -35,12 +36,17 @@ func main() {
 	fmt.Printf("%s: Total files to be verified: %v\n", toolName, c.Green(len(sourceFiles)))
 
 	// 3. verify files&rules one by one
-	filesNotMeetRules, err := process(sourceFiles, rules)
+	filesNotMeetRules, err := process(sourceFiles, rules, cfg.Mode)
 	if err != nil {
 		fmt.Printf("%s: Quitting due to process error, %v", toolName, err)
 		return
 	}
 
+	if len(filesNotMeetRules) == 0 {
+		return
+	}
+
+	// 4. verification summary
 	// sort map keys(file names)
 	var fileNames []string
 	for k := range filesNotMeetRules {
@@ -48,7 +54,6 @@ func main() {
 	}
 	sort.Strings(fileNames)
 
-	// 4. verification summary
 	fmt.Printf("%s: Result details: \n", toolName)
 	for _, k := range fileNames {
 		fmt.Printf("%s: %s\n", c.Cyan("File"), k)
@@ -56,9 +61,21 @@ func main() {
 	}
 }
 
-func process(files []string, rules []rule) (map[string][]string, error) {
-	bar := pb.StartNew(len(files))
-	var filesNotMeetRules = make(map[string][]string)
+func process(files []string, rules []rule, mode string) (map[string][]string, error) {
+	var (
+		err               error
+		beanPayload       string
+		filesNotMeetRules = make(map[string][]string)
+		bar               = pb.StartNew(len(files))
+	)
+
+	if mode != "static" {
+		beanPayload, err = getBeansPayload()
+		if err != nil {
+			fmt.Printf("%s: Failed to get runtime beans due to: %v\n", toolName, err)
+			return filesNotMeetRules, err
+		}
+	}
 	for _, file := range files {
 		source, err := extractSource(file)
 		if err != nil {
@@ -67,7 +84,24 @@ func process(files []string, rules []rule) (map[string][]string, error) {
 		}
 
 		for _, rule := range rules {
-			isMet, err := rule.isMet(source)
+			if mode == "static" {
+				isMet, err := rule.isMetStaticly(source)
+				if err != nil {
+					fmt.Printf("%s: Failed to verify rule due to: %v\n", toolName, file)
+					return filesNotMeetRules, err
+				}
+
+				if !isMet {
+					if _, ok := filesNotMeetRules[file]; ok {
+						filesNotMeetRules[file] = append(filesNotMeetRules[file], rule.getName())
+					} else {
+						filesNotMeetRules[file] = []string{rule.getName()}
+					}
+				}
+				continue
+			}
+
+			isMet, err := rule.isMetRuntimely(source, beanPayload)
 			if err != nil {
 				fmt.Printf("%s: Failed to verify rule due to: %v\n", toolName, file)
 				return filesNotMeetRules, err
@@ -80,6 +114,7 @@ func process(files []string, rules []rule) (map[string][]string, error) {
 					filesNotMeetRules[file] = []string{rule.getName()}
 				}
 			}
+
 		}
 		bar.Increment()
 	}
@@ -139,4 +174,20 @@ func needToBeExclude(fileName string, cfg config) bool {
 		}
 	}
 	return false
+}
+
+func getBeansPayload() (string, error) {
+	resp, err := http.Get("http://localhost:9202/actuator/beans")
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
 }

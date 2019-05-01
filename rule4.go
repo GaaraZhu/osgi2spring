@@ -12,7 +12,7 @@ func (r rule4) getDescription() string {
 	return "OSGI injected properties should be injected by spring"
 }
 
-func (r rule4) isMet(source string) (bool, error) {
+func (r rule4) isMetStaticly(source string) (bool, error) {
 	if !strings.Contains(source, "@Component") {
 		return true, nil // skip for non OSGI beans
 	}
@@ -43,5 +43,9 @@ func (r rule4) isMet(source string) (bool, error) {
 		}
 	}
 
+	return true, nil
+}
+
+func (r rule4) isMetRuntimely(source, beanPayload string) (bool, error) {
 	return true, nil
 }

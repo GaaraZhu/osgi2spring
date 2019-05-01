@@ -12,7 +12,7 @@ func (r rule2) getDescription() string {
 	return "activation method should be invoked after object construction"
 }
 
-func (r rule2) isMet(source string) (bool, error) {
+func (r rule2) isMetStaticly(source string) (bool, error) {
 	if !strings.Contains(source, "@Component") {
 		return true, nil // skip for non OSGI components
 	}
@@ -35,5 +35,9 @@ func (r rule2) isMet(source string) (bool, error) {
 		return false, nil
 	}
 
+	return true, nil
+}
+
+func (r rule2) isMetRuntimely(source, beanPayload string) (bool, error) {
 	return true, nil
 }

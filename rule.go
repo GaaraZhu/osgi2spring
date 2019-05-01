@@ -5,7 +5,9 @@ type rule interface {
 
 	getDescription() string
 
-	isMet(source string) (bool, error) //spaces, tabs and new lines should be removed from source before passing here
+	isMetStaticly(source string) (bool, error)
+
+	isMetRuntimely(source, beanPayload string) (bool, error)
 }
 
 var ruleRegistry = make(map[string]rule)

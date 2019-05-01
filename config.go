@@ -8,16 +8,16 @@ import (
 )
 
 type config struct {
-	SourceFolder       string   `json:"source-folder"`
-	FilesToBeExcluded  []string `json:"files-to-be-excluded"`
-	ConfigFileSuffixes []string `json:"config-file-suffixes"`
-	Rules              []string `json:"rules"`
+	SourceFolder      string   `json:"source-folder"`
+	FilesToBeExcluded []string `json:"files-to-be-excluded"`
+	Rules             []string `json:"rules"`
+	Mode              string   `json:"mode"`
 }
 
 var defaultConfig = config{
-	SourceFolder:       "~/IdeaProjects/cms/play",
-	FilesToBeExcluded:  []string{"RedissonConfiguration.java", "PreBid.java", "EndpointSentryConfig.java"},
-	ConfigFileSuffixes: []string{".yaml", ".properties"},
+	SourceFolder:      "~/IdeaProjects/cms/play",
+	FilesToBeExcluded: []string{"RedissonConfiguration.java", "PreBid.java", "EndpointSentryConfig.java"},
+	Mode:              "static",
 }
 
 func mustParseConfig() config {
